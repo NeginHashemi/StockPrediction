@@ -131,7 +131,7 @@ def main():
     total_start_time = time.time()
     best_success_rate = 0
     test_env_name = args.env
-    
+
     utils.save_obj(args, args.model, 'args.pkl')
 
     while status['num_frames'] < args.frames:
@@ -168,10 +168,6 @@ def main():
                                                                                                                                                                  "S {:.2f} | F:xsmM {:.1f} {:.1f} {} {} | H {:.3f} | V {:.3f} | "
                                                                                                                                                                  "pL {: .3f} | vL {:.3f} | L {:.3f} | gN {:.3f} | ")
             logger.info(format_str.format(*data))
-            if args.tb:
-                assert len(header) == len(data)
-                for key, value in zip(header, data):
-                    writer.add_scalar(key, float(value), status['num_frames'])
 
             csv_writer.writerow(data)
 
