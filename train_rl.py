@@ -51,7 +51,7 @@ def main():
     # Generate environments
     envs = []
     for i in range(args.procs):
-        env = StockEnv(stock_trend_filepaths=args.stock_filepath, 
+        env = StockEnv(stock_trend_filepaths=args.stock_filepaths, 
                        obs_column_names=args.obs_columns, w=args.w)
         env.seed(seed = 100 * args.seed + i)
         envs.append(env)
