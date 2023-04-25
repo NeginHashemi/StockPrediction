@@ -456,7 +456,7 @@ class PPOAlgo(BaseAlgo):
 
                 self.optimizer.zero_grad()
                 # because we have a loop on variables in NPS and shared layers occur, set retain_graph to True
-                batch_loss.backward(retain_graph=self.acmodel.arch.startswith("NPS")) 
+                batch_loss.backward() 
                 grad_norm = sum(p.grad.data.norm(2) ** 2 for p in self.acmodel.parameters() if p.grad is not None) ** 0.5
                 torch.nn.utils.clip_grad_norm_(self.acmodel.parameters(), self.max_grad_norm)
                 self.optimizer.step()
