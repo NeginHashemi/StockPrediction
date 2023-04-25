@@ -130,8 +130,8 @@ def main():
 
     total_start_time = time.time()
     best_success_rate = 0
-    test_env_name = args.env if args.test_env is None else args.test_env
-
+    test_env_name = args.env
+    
     utils.save_obj(args, args.model, 'args.pkl')
 
     while status['num_frames'] < args.frames:
