@@ -68,7 +68,7 @@ def main():
     logger = logging.getLogger(__name__)
 
     # Define obss preprocessor
-    obss_preprocessor = utils.ObssPreprocessor(args.model, envs[0].observation_space, args.pretrained_model)
+    obss_preprocessor = utils.ObssPreprocessor(args.model, envs[0].observation_space)
 
     # Define actor-critic model
     acmodel = None
