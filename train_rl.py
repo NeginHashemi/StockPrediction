@@ -183,7 +183,9 @@ def main():
             agent = ModelAgent(args.model, obss_preprocessor, argmax=True)
             agent.model = acmodel
             agent.model.eval()
-            logs = batch_evaluate(agent, test_env_name, args.val_seed, args.val_episodes,
+            env_kwargs = dict(stock_trend_filepaths=args.stock_filepaths, 
+                       obs_column_names=args.obs_columns, w=args.w)
+            logs = batch_evaluate(agent, env_kwargs, args.val_seed, args.val_episodes,
                                   return_obss_actions=True)
 
             agent.model.train()

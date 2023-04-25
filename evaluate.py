@@ -1,6 +1,7 @@
 import numpy as np
 import gym
 import torch
+from stock_env import StockEnv
 
 # Returns the performance of the agent on the environment for a particular number of episodes.
 def evaluate(agent, env, episodes, model_agent=True, offsets=None):
@@ -83,14 +84,14 @@ class ManyEnvs(gym.Env):
 
 
 # Returns the performance of the agent on the environment for a particular number of episodes.
-def batch_evaluate(agent, env_name, seed, episodes, return_obss_actions=True):
+def batch_evaluate(agent, env_kwargs, seed, episodes, return_obss_actions=True):
     num_envs = min(256, episodes)
 
     # print(use_compositional_split, compositional_test_splits)
 
     envs = []
     for i in range(num_envs):
-        env = gym.make(env_name)
+        env = StockEnv(**env_kwargs)
         envs.append(env)
     env = ManyEnvs(envs)
 
