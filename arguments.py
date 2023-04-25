@@ -12,6 +12,9 @@ class ArgumentParser(argparse.ArgumentParser):
         # Base arguments
         self.add_argument("--env", default='StockPrediction-v0',
                             help="name of the environment to train on (REQUIRED)")
+        self.add_argument("--stock_filepath", type="str", nargs='+')
+        self.add_argument("--obs_columns", type="str", nargs='+')
+        self.add_argument("--w", type=int, default=10)
         self.add_argument("--model", default='model')
         self.add_argument("--seed", type=int, default=1,
                             help="random seed; if 0, a random random seed will be used  (default: 1)")

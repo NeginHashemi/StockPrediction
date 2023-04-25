@@ -17,8 +17,8 @@ def read_csv(p):
 class StockEnv(gym.Env):
 
     def __init__(self, stock_trend_filepaths=None, obs_column_names=None, w=10):
-        self.stock_info = [read_csv(p)[obs_column_names] for p in stock_trend_filepaths]
-        print(self.stock_info[0].head())
+        self.stock_info = [read_csv(p) for p in stock_trend_filepaths]
+        self.obs_column_names = obs_column_names
         self.obs_size = len(obs_column_names)
         self.horizon = 140
         self.action_space = spaces.Discrete(2)
@@ -47,8 +47,8 @@ class StockEnv(gym.Env):
             self.agents_has_money = False
         else:
             self.agents_has_money = True
-        start_candle = self.stock_info[self.current_stock_ind].iloc[self.current_candle_ind]
-        end_candle = self.stock_info[self.current_stock_ind].iloc[self.current_candle_ind + self.w]
+        start_candle = self.stock_info[self.current_stock_ind][self.obs_column_names].iloc[self.current_candle_ind]
+        end_candle = self.stock_info[self.current_stock_ind][self.obs_column_names].iloc[self.current_candle_ind + self.w]
         reward = -int(self.agents_has_money) * (end_candle['close'] - start_candle['open']) / end_candle['close']
         self.current_candle_ind += 1
         done = (self.current_candle_ind - self.starting_candle_ind) >= self.horizon or self.current_candle_ind >= (self.num_candles - self.w)# reach the horizon
@@ -64,4 +64,4 @@ class StockEnv(gym.Env):
         return self._get_obs()
 
     def _get_obs(self):
-        return self.stock_info[self.current_stock_ind].iloc[self.current_candle_ind]
+        return self.stock_info[self.current_stock_ind][self.obs_column_names].iloc[self.current_candle_ind]
