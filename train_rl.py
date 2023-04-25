@@ -24,14 +24,8 @@ import utils
 from ppo import PPOAlgo
 from stock_env import StockEnv
 
-root = Path(__file__).absolute().parent.parent
+root = Path(__file__).absolute()
 log_dir = os.path.join(root.parent, 'logs')
-sys.path.insert(0, os.path.join(root, ''))
-
-root_project_dir = os.path.join(root, 'models')
-
-sys.path.insert(1, os.path.join(root_project_dir, ''))
-
 os.environ['STOCK_STORAGE'] = log_dir
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
