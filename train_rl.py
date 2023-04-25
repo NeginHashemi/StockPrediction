@@ -53,7 +53,7 @@ def main():
     # Define model name
     suffix = datetime.datetime.now().strftime("%y-%m-%d-%H-%M-%S")
 
-    default_model_name = "PPO_" + args.flag + suffix
+    default_model_name = "PPO_" + args.flag + "_" + suffix
     
     args.model = default_model_name
 
