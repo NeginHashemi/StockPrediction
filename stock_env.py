@@ -23,7 +23,7 @@ class StockEnv(gym.Env):
         self.horizon = 140
         self.action_space = spaces.Discrete(2)
         self.observation_space = spaces.Box(float('inf'), float('inf'), 
-                                            dtype=np.float, shape=(self.obs_size,)), 
+                                            dtype=float, shape=(self.obs_size,)), 
 
         self.agents_has_money = True # spend all of the money each time
         self.starting_candle_ind = None
