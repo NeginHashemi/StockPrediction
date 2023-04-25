@@ -9,21 +9,17 @@ from ppo import DictList
 
 class RawImagePreprocessor(object):
     def __call__(self, obss, device=None):
-        images = numpy.array([obs["image"] for obs in obss])
-        images = torch.tensor(images, device=device, dtype=torch.float)
-        return images
+        obs = numpy.array(obss)
+        obs = torch.tensor(obs, device=device, dtype=torch.float)
+        return obs
 
 
 class ObssPreprocessor:
     def __init__(self, model_name, obs_space=None):
-        self.image_preproc = RawImagePreprocessor()
+        self.preproc = RawImagePreprocessor()
 
     def __call__(self, obss, device=None):
-        obs_ = DictList()
-        obs_.image = self.image_preproc(obss, device=device)
-        raise 'image not present'
-
-        return obs_
+        return self.preproc(obss, device=device)
     
 
 def storage_dir():

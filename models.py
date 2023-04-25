@@ -22,7 +22,7 @@ class ACModel(nn.Module):
         self.obs_space = obs_space
         self.action_space = action_space
         self.memory_dim = memory_dim
-        self.input_obs_shape = self.obs_space[0].shape
+        self.input_obs_shape = self.obs_space[0].shape[0]
         
         self.layers = nn.Sequential(
             nn.Linear(self.input_obs_shape, 64),

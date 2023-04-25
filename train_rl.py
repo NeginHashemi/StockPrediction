@@ -72,7 +72,7 @@ def main():
 
     # Define actor-critic model
     acmodel = None
-    acmodel = ACModel(obss_preprocessor.obs_space, envs[0].action_space, memory_dim=args.memory_dim)
+    acmodel = ACModel(envs[0].observation_space, envs[0].action_space, memory_dim=args.memory_dim)
     utils.save_model(acmodel, args.model)
 
     if device == 'cuda':
