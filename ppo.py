@@ -354,7 +354,6 @@ class PPOAlgo(BaseAlgo):
 
         self.optimizer = torch.optim.Adam(self.acmodel.parameters(), lr, (beta1, beta2), eps=adam_eps)
         self.batch_num = 0
-        self.NS_loss = NS_loss
 
     def update_parameters(self):
         # Collect experiences
