@@ -52,7 +52,7 @@ def main():
     utils.save_model(rmodel, args.model)
 
     rmodel = rmodel.to(device)
-
+    
     algo = Regression(rmodel, train_dl, val_dl, test_dl, device=device, lr=args.lr)
     
     utils.seed(args.seed)

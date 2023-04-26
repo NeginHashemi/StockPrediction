@@ -18,7 +18,7 @@ class StockDataset(torch.utils.data.Dataset):
         start_candle = self.data_pd.iloc[item]
         end_candle = self.data_pd.iloc[min(item+self.w, len(self.data_pd))]
         y = (end_candle['close'] - start_candle['open']) / end_candle['close']
-        return self.data_pd.iloc[max(item-self.w, 0):item].to_numpy(), y.to_numpy()
+        return self.data_pd.iloc[max(item-self.w, 0):item].to_numpy(), y
 
 
 def StockLoader(stock_filepaths, column_names, batch_size, w, split=[0.8, 0.1]):
