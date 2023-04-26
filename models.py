@@ -82,3 +82,32 @@ class ACModel(nn.Module):
 
         return {'dist': dist, 'value': value, 'memory': memory}
 
+
+class RModel(nn.Module):
+    def __init__(self, in_dim=9, memory_dim=64):
+        super().__init__()
+        
+        self.in_dim = in_dim
+        self.memory_dim = memory_dim
+        
+        self.layers = nn.Sequential(
+            nn.Linear(self.in_dim, 64),
+            nn.ReLU(),
+            nn.Linear(64, self.memory_dim)
+        )
+
+        # Define memory
+        self.memory_rnn = nn.LSTM(self.memory_dim, self.memory_dim, 1, batch_first=True)
+
+        # Initialize parameters correctly
+        self.apply(initialize_parameters)
+
+    def forward(self, x):
+        
+        bs, L, d = x.shape
+        x = self.layers(x.view(bs*L, d)) # model output
+
+        output, _ = self.memory_rnn(x.view(bs, L, self.memory_dim))
+
+        return output
+

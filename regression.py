@@ -1,4 +1,5 @@
 import torch
+import numpy as np
 import pandas as pd
 from stock_env import read_csv
 
@@ -6,53 +7,18 @@ from stock_env import read_csv
 class StockDataset(torch.utils.data.Dataset):
     """ Create a PyTorch dataset for Divar. """
 
-    def __init__(self, tokenizer, xs, label_list=None, max_len=128):
-        self.xs = xs
-        self.tokenizer = tokenizer
-        self.max_len = max_len
-        self.label_map = {label: i for i, label in enumerate(label_list)} if isinstance(label_list, list) else {}
-    
+    def __init__(self, data_pd, w):
+        self.data_pd = data_pd
+        self.w = w
+
     def __len__(self):
-        return len(self.xs)
+        return len(self.data_pd)
 
     def __getitem__(self, item):
-        x = self.xs[item]
-
-        target = self.label_map.get(x['cat1'])
-
-        desc_encoding = self.tokenizer.encode_plus(
-            x['desc'],
-            add_special_tokens=True,
-            truncation=True,
-            max_length=self.max_len,
-            return_token_type_ids=True,
-            padding='max_length',
-            return_attention_mask=True,
-            return_tensors='pt')        
-        
-        title_encoding = self.tokenizer.encode_plus(
-            x['title'],
-            add_special_tokens=True,
-            truncation=True,
-            max_length=self.max_len,
-            return_token_type_ids=True,
-            padding='max_length',
-            return_attention_mask=True,
-            return_tensors='pt')
-        
-        inputs = {
-            'desc_input_ids': desc_encoding['input_ids'].flatten(),
-            'desc_attention_mask': desc_encoding['attention_mask'].flatten(),
-            'desc_token_type_ids': desc_encoding['token_type_ids'].flatten(),
-
-            'title_input_ids': title_encoding['input_ids'].flatten(),
-            'title_attention_mask': title_encoding['attention_mask'].flatten(),
-            'title_token_type_ids': title_encoding['token_type_ids'].flatten(),
-        }
-
-        inputs['targets'] = torch.tensor(target, dtype=torch.long)
-        
-        return inputs
+        start_candle = self.data_pd.iloc[item]
+        end_candle = self.data_pd.iloc[min(item+self.w, len(self.data_pd))]
+        y = (end_candle['close'] - start_candle['open']) / end_candle['close']
+        return self.data_pd.iloc[max(item-self.w, 0):item].to_numpy(), y.to_numpy()
 
 
 def StockLoader(stock_filepaths, column_names, batch_size, w, split=[0.8, 0.1]):
@@ -71,3 +37,72 @@ def StockLoader(stock_filepaths, column_names, batch_size, w, split=[0.8, 0.1]):
     test_dl = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size)
     
     return train_dl, val_dl, test_dl
+
+
+class Regression():
+    def __init__(self, model, train_dl, val_dl, test_dl, device=None, lr=1e-5) -> None:
+        self.model = model.to(device)
+        self.train_dl = train_dl
+        self.val_dl = val_dl
+        self.test_dl = test_dl
+
+        self.lr = lr
+        self.device = device
+
+        self.criterion = torch.nn.MSELoss()    # mean-squared error for regression
+        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=self.lr)
+
+    def train_epoch(self):
+        self.model.train()
+        total_loss = 0
+        total_acc = 0
+        total_confidence = 0
+        cnt = 0
+        for x, y in iter(self.train_dl):
+            x, y = x.to(self.device), y.to(self.device)
+            self.optimizer.zero_grad()
+            outputs = self.model(x)
+            loss = self.criterion(outputs, y)
+            total_loss += loss.item()
+            loss.backward()
+            self.optimizer.step()
+            total_confidence += abs(outputs.detach().cpu().sum())
+            total_acc += (torch.sign(outputs) == torch.sign(y)).sum().item() / torch.numel(outputs)
+            cnt += 1
+
+        return total_loss / cnt, total_confidence / cnt, total_acc / cnt
+
+    def test_epoch(self, dl):
+        self.model.eval()
+        with torch.no_grad():
+            total_loss = 0
+            total_acc = 0
+            total_confidence = 0
+            cnt = 0
+            for x, y in iter(dl):
+                x, y = x.to(self.device), y.to(self.device)
+                outputs = self.model(x)
+                loss = self.criterion(outputs, y)
+                total_loss += loss.item()
+                total_confidence += abs(outputs.detach().cpu().sum())
+                total_acc += (torch.sign(outputs) == torch.sign(y)).sum().item() / torch.numel(outputs)
+                cnt += 1
+            return total_loss / cnt, total_confidence / cnt, total_acc / cnt
+
+    def train(self, num_epoch=100, val_turn=10):
+        history_df = pd.DataFrame(columns = ['total_acc', 'total_confidence', 'total_acc', 'is_train'])
+        for e in range(num_epoch):
+            total_loss, total_confidence, total_acc = self.train_epoch()
+            print("Epoch {} ==== Loss: {}, Confidence: {}, Accuracy: {}".format(e, total_loss, total_confidence, total_acc))
+            history_df = history_df.append(dict(total_loss=total_loss, total_confidence=total_confidence, total_acc=total_acc, is_train=True), ignore_index=True)
+            if e % val_turn == 0 and e > 0:
+                total_acc, total_confidence, total_acc = self.test_epoch(self.val_dl)
+                print("================= Eval Epoch {} ==== Loss: {}, Confidence: {}, Accuracy: {}".format(e, total_loss, total_confidence, total_acc))
+                history_df = history_df.append(dict(total_loss=total_loss, total_confidence=total_confidence, total_acc=total_acc, is_train=False), ignore_index=True)
+        return history_df
+            
+            
+
+
+
+
