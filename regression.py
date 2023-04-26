@@ -12,9 +12,10 @@ class StockDataset(torch.utils.data.Dataset):
         self.w = w
 
     def __len__(self):
-        return len(self.data_pd)
+        return len(self.data_pd - 2 * self.w)
 
     def __getitem__(self, item):
+        item = self.w + item
         start_candle = self.data_pd.iloc[item]
         end_candle = self.data_pd.iloc[min(item+self.w, len(self.data_pd))]
         y = (end_candle['close'] - start_candle['open']) / end_candle['close']
