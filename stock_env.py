@@ -9,7 +9,10 @@ from datetime import datetime
 def read_csv(p):
     df = pd.read_csv(p)
     def epoch_time(t):
-        utc_time = datetime.strptime(t, "%Y-%m-%d")
+        try:
+            utc_time = datetime.strptime(t, "%Y-%m-%d")
+        except ValueError:
+            utc_time = datetime.strptime(t, "%Y-%m-%d %H:%M:%S")
         return (utc_time - datetime(1970, 1, 1)).total_seconds()
     df['time'] = df['time'].apply(epoch_time)
     return df
