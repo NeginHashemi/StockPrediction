@@ -99,6 +99,8 @@ class RModel(nn.Module):
         # Define memory
         self.memory_rnn = nn.LSTM(self.memory_dim, self.memory_dim, 1, batch_first=True)
 
+        self.final = nn.Linear(self.memory_dim, 1)
+        
         # Initialize parameters correctly
         self.apply(initialize_parameters)
 
@@ -109,5 +111,6 @@ class RModel(nn.Module):
 
         output, _ = self.memory_rnn(x.view(bs, L, self.memory_dim))
 
-        return output
+        output = self.final(output[:, -1, :]).reshape([bs,])
 
+        return output

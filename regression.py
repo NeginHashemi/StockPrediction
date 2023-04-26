@@ -12,14 +12,17 @@ class StockDataset(torch.utils.data.Dataset):
         self.w = w
 
     def __len__(self):
-        return len(self.data_pd - 2 * self.w)
+        return len(self.data_pd)
 
     def __getitem__(self, item):
-        item = self.w + item
+        if item >= len(self) - self.w:
+            item -= self.w
+        elif item < self.w:
+            item = self.w
         start_candle = self.data_pd.iloc[item]
-        end_candle = self.data_pd.iloc[min(item+self.w, len(self.data_pd))]
+        end_candle = self.data_pd.iloc[min(item+self.w, len(self.data_pd) - 1)]
         y = (end_candle['close'] - start_candle['open']) / end_candle['close']
-        return self.data_pd.iloc[max(item-self.w, 0):item].to_numpy(), y
+        return self.data_pd.iloc[max(item-self.w, 0):item].to_numpy(dtype=np.float32), np.float32(y)
 
 
 def StockLoader(stock_filepaths, column_names, batch_size, w, split=[0.8, 0.1]):
@@ -70,7 +73,8 @@ class Regression():
             total_confidence += abs(outputs.detach().cpu().sum())
             total_acc += (torch.sign(outputs) == torch.sign(y)).sum().item() / torch.numel(outputs)
             cnt += 1
-
+        if cnt == 0:
+            return 0, 0, 0
         return total_loss / cnt, total_confidence / cnt, total_acc / cnt
 
     def test_epoch(self, dl):
@@ -88,10 +92,12 @@ class Regression():
                 total_confidence += abs(outputs.detach().cpu().sum())
                 total_acc += (torch.sign(outputs) == torch.sign(y)).sum().item() / torch.numel(outputs)
                 cnt += 1
+            if cnt == 0:
+                return 0, 0, 0
             return total_loss / cnt, total_confidence / cnt, total_acc / cnt
 
     def train(self, num_epoch=100, val_turn=10):
-        history_df = pd.DataFrame(columns = ['total_acc', 'total_confidence', 'total_acc', 'is_train'])
+        history_df = pd.DataFrame(columns = ['total_loss', 'total_confidence', 'total_acc', 'is_train'])
         for e in range(num_epoch):
             total_loss, total_confidence, total_acc = self.train_epoch()
             print("Epoch {} ==== Loss: {}, Confidence: {}, Accuracy: {}".format(e, total_loss, total_confidence, total_acc))
