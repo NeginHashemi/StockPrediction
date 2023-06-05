@@ -28,14 +28,14 @@ def read_csv(p):
 
 class StockEnv(gym.Env):
 
-    def __init__(self, stock_trend_filepaths=None, obs_column_names=None, w=10):
+    def __init__(self, stock_trend_filepaths=None, obs_column_names=None, w=10, c=5):
         self.stock_info = [read_csv(p) for p in stock_trend_filepaths]
         self.obs_column_names = obs_column_names
         self.obs_size = len(obs_column_names)
         self.horizon = 140
         self.action_space = spaces.Discrete(2)
         self.observation_space = spaces.Box(float('inf'), float('inf'), 
-                                            dtype=float, shape=(self.obs_size,)), 
+                                            dtype=float, shape=(self.obs_size*c,)), 
 
         # self.agents_has_money = True # spend all of the money each time
         self.starting_candle_ind = None
@@ -43,6 +43,7 @@ class StockEnv(gym.Env):
         self.current_stock_ind = None
         self.num_candles = None
         self.w = w
+        self.c = c
         self._seed()
 
     def _seed(self, seed=None):
@@ -76,4 +77,4 @@ class StockEnv(gym.Env):
         return self._get_obs()
 
     def _get_obs(self):
-        return self.stock_info[self.current_stock_ind][self.obs_column_names].iloc[self.current_candle_ind]
+        return self.stock_info[self.current_stock_ind][self.obs_column_names].iloc[np.max(self.current_candle_ind - self.c, 0):self.current_candle_ind].to_numpy().reshape(-1)
