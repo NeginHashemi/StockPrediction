@@ -8,13 +8,22 @@ from datetime import datetime
 
 def read_csv(p):
     df = pd.read_csv(p)
-    def epoch_time(t):
+    def epoch_time(row):
+        Y, M, D, H, Min, Sec = None, None, None, None, None, None
         try:
-            utc_time = datetime.strptime(t, "%Y-%m-%d")
+            utc_time = datetime.strptime(row['time'], "%Y-%m-%d")
+            Y, M, D = utc_time.year, utc_time.month, utc_time.day
         except ValueError:
-            utc_time = datetime.strptime(t, "%Y-%m-%d %H:%M:%S")
-        return (utc_time - datetime(1970, 1, 1)).total_seconds()
-    df['time'] = df['time'].apply(epoch_time)
+            utc_time = datetime.strptime(row['time'], "%Y-%m-%d %H:%M:%S")
+            Y, M, D, H, Min, Sec = utc_time.year, utc_time.month, utc_time.day, utc_time.hour, utc_time.minute, utc_time.second
+        row['year'] = Y
+        row['month'] = M
+        row['day'] = D
+        row['hour'] = H
+        row['minute'] = Min
+        row['second'] = Sec
+        return row # (utc_time - datetime(1970, 1, 1)).total_seconds()
+    df = df.apply(epoch_time, axis=1)
     return df
 
 class StockEnv(gym.Env):
