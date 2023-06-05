@@ -25,7 +25,7 @@ class StockDataset(torch.utils.data.Dataset):
         return self.data_pd.iloc[max(item-self.w, 0):item].to_numpy(dtype=np.float32), np.float32(y)
 
 
-def StockLoader(stock_filepaths, column_names, batch_size, w, split=[0.8, 0.1]):
+def StockLoader(stock_filepaths, column_names, batch_size, w, split=[0.8, 0.9]):
     stock_info = [read_csv(p) for p in stock_filepaths]
 
     train_pd = pd.concat([df[column_names].iloc[0:int(len(df) * split[0])] for df in stock_info], ignore_index=True)

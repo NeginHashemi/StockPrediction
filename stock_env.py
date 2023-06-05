@@ -28,7 +28,7 @@ class StockEnv(gym.Env):
         self.observation_space = spaces.Box(float('inf'), float('inf'), 
                                             dtype=float, shape=(self.obs_size,)), 
 
-        self.agents_has_money = True # spend all of the money each time
+        # self.agents_has_money = True # spend all of the money each time
         self.starting_candle_ind = None
         self.current_candle_ind = None
         self.current_stock_ind = None
@@ -46,13 +46,13 @@ class StockEnv(gym.Env):
         - 0: buy or keep
         - 1: sell
         """
-        if action == 0:
-            self.agents_has_money = False
-        else:
-            self.agents_has_money = True
+        # if action == 0:
+        #     self.agents_has_money = False
+        # else:
+        #     self.agents_has_money = True
         start_candle = self.stock_info[self.current_stock_ind][self.obs_column_names].iloc[self.current_candle_ind]
         end_candle = self.stock_info[self.current_stock_ind][self.obs_column_names].iloc[self.current_candle_ind + self.w]
-        reward = -int(self.agents_has_money) * (end_candle['close'] - start_candle['open']) / end_candle['close']
+        reward = (end_candle['close'] - start_candle['close']) / start_candle['close'] # -int(self.agents_has_money) * 
         self.current_candle_ind += 1
         done = (self.current_candle_ind - self.starting_candle_ind) >= self.horizon or self.current_candle_ind >= (self.num_candles - self.w)# reach the horizon
         info = {}
