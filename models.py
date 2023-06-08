@@ -80,10 +80,12 @@ class ACModel(nn.Module):
 
     def forward(self, obs, memory):
 
+        bs = obs.shape[0]
+
         if self.arch == 'linear':
             x = self.layers(obs) # model output
         elif self.arch == 'attention':
-            embedded = self.conv(obs)
+            embedded = self.conv(obs.reshape(bs, self.c, -1))
             output = self.transformer(embedded.squeeze(3))
             x = self.fc1(output.squeeze(1))
 
