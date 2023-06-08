@@ -36,8 +36,9 @@ class ACModel(nn.Module):
             )
 
         else:
-
-            self.conv = nn.Conv2d(kernel_size=(1, self.input_obs_shape), out_channels=1, in_channels=1)
+            num_features = int(self.input_obs_shape//self.past_window_size)
+            self.conv = nn.Conv2d(kernel_size=(1, num_features), out_channels=1, 
+            in_channels=1, stride=(1, num_features))
             self.transformer = nn.TransformerEncoder(
                 nn.TransformerEncoderLayer(self.past_window_size, 4),
                 2
@@ -85,8 +86,8 @@ class ACModel(nn.Module):
         if self.arch == 'linear':
             x = self.layers(obs) # model output
         elif self.arch == 'attention':
-            embedded = self.conv(obs.reshape(bs, self.c, -1))
-            output = self.transformer(embedded.squeeze(3))
+            embedded = self.conv(obs.reshape(bs, 1, 1, -1))
+            output = self.transformer(embedded.squeeze(2))
             x = self.fc1(output.squeeze(1))
 
         hidden = (memory[:, :self.semi_memory_size], memory[:, self.semi_memory_size:])

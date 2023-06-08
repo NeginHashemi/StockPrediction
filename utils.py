@@ -9,7 +9,7 @@ from ppo import DictList
 
 class RawImagePreprocessor(object):
     def __call__(self, obss, device=None):
-        obs = numpy.array(obss)
+        obs = numpy.stack(obss, axis=0)
         obs = torch.from_numpy(obs).float().to(device)
         return obs
 
