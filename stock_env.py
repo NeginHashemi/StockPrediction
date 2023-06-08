@@ -45,6 +45,7 @@ class StockEnv(gym.Env):
         self.w = w
         self.c = c
         self._seed()
+        self.L = self.c * len(self.obs_column_names)
 
     def _seed(self, seed=None):
         self.np_random, seed = seeding.np_random(seed)
@@ -77,4 +78,10 @@ class StockEnv(gym.Env):
         return self._get_obs()
 
     def _get_obs(self):
-        return self.stock_info[self.current_stock_ind][self.obs_column_names].iloc[np.max(self.current_candle_ind - self.c, 0):self.current_candle_ind].to_numpy().reshape(-1)
+        i = np.max(self.current_candle_ind - self.c, 0)
+        obs = self.stock_info[self.current_stock_ind][self.obs_column_names].iloc[i:self.current_candle_ind].to_numpy().reshape(-1)
+        if len(obs) < self.L:
+            obs = np.concatenate((np.zeros(self.L - len(obs),), obs))
+        return obs
+        
+
