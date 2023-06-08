@@ -26,8 +26,8 @@ class ArgumentParser(argparse.ArgumentParser):
         self.add_argument("--log_interval", type=int, default=10,
                             help="number of updates between two logs (default: 10)")
         self.add_argument('--log_dir', type=str, default=None)
-        self.add_argument("--save_interval", type=int, default=1000,
-                            help="number of updates between two saves (default: 1000, 0 means no saving)")
+        self.add_argument("--save_interval", type=int, default=0,
+                            help="number of updates between two saves (default: 0, 0 means no saving)")
         self.add_argument("--frames", type=int, default=int(9e10),
                             help="number of frames of training (default: 9e10)")
         self.add_argument("--patience", type=int, default=100,
@@ -42,7 +42,7 @@ class ArgumentParser(argparse.ArgumentParser):
                             help="beta1 for Adam (default: 0.9)")
         self.add_argument("--beta2", type=float, default=0.999,
                             help="beta2 for Adam (default: 0.999)")
-        self.add_argument("--recurrence", type=int, default=400,
+        self.add_argument("--recurrence", type=int, default=200,
                             help="number of timesteps gradient is backpropagated (default: 20)")
         self.add_argument("--optim_eps", type=float, default=1e-5,
                             help="Adam and RMSprop optimizer epsilon (default: 1e-5)")

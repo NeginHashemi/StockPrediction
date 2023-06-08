@@ -175,29 +175,6 @@ def main():
                 json.dump(status, dst)
                 utils.save_model(acmodel, args.model)
 
-            # Testing the model before saving
-            agent = ModelAgent(args.model, obss_preprocessor, argmax=True)
-            agent.model = acmodel
-            agent.model.eval()
-            env_kwargs = dict(stock_trend_filepaths=args.stock_filepaths, 
-                       obs_column_names=args.obs_columns, w=args.w)
-            logs = batch_evaluate(agent, env_kwargs, args.val_seed, args.val_episodes,
-                                  return_obss_actions=True)
-
-            agent.model.train()
-
-            mean_return = np.mean(logs["return_per_episode"])
-            success_rate = np.mean([1 if r > 0 else 0 for r in logs['return_per_episode']])
-
-            if success_rate > best_success_rate:
-                best_success_rate = success_rate
-                utils.save_model(acmodel, args.model + '_best')
-                logger.info("Return {: .2f}; best model is saved".format(mean_return))
-                logger.info("SR {: .2f}; best model is saved".format(success_rate))
-            else:
-                logger.info("Return {: .2f}; not the best model; not saved".format(mean_return))
-                logger.info("SR {: .2f}; not the best model; not saved".format(success_rate))
-
 
 if __name__ == '__main__':
     main()
