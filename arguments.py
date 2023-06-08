@@ -15,6 +15,7 @@ class ArgumentParser(argparse.ArgumentParser):
         self.add_argument("--stock_filepaths", type=str, nargs='+')
         self.add_argument("--obs_columns", type=str, nargs='+')
         self.add_argument("--w", type=int, default=10)
+        self.add_argument("--c", type=int, default=50)
         self.add_argument("--model", default='model')
         self.add_argument("--seed", type=int, default=1,
                             help="random seed; if 0, a random random seed will be used  (default: 1)")
@@ -33,7 +34,7 @@ class ArgumentParser(argparse.ArgumentParser):
                             help="patience for early stopping (default: 100)")
         self.add_argument("--epochs", type=int, default=1000000,
                             help="maximum number of epochs")
-        self.add_argument("--frames_per_proc", type=int, default=40,
+        self.add_argument("--frames_per_proc", type=int, default=200,
                             help="number of frames per process before update (default: 40)")
         self.add_argument("--lr", type=float, default=1e-4,
                             help="learning rate (default: 1e-4)")
@@ -41,7 +42,7 @@ class ArgumentParser(argparse.ArgumentParser):
                             help="beta1 for Adam (default: 0.9)")
         self.add_argument("--beta2", type=float, default=0.999,
                             help="beta2 for Adam (default: 0.999)")
-        self.add_argument("--recurrence", type=int, default=20,
+        self.add_argument("--recurrence", type=int, default=400,
                             help="number of timesteps gradient is backpropagated (default: 20)")
         self.add_argument("--optim_eps", type=float, default=1e-5,
                             help="Adam and RMSprop optimizer epsilon (default: 1e-5)")
@@ -55,6 +56,8 @@ class ArgumentParser(argparse.ArgumentParser):
         # Model parameters
         self.add_argument("--memory_dim", type=int, default=128,
                             help="dimensionality of the memory LSTM")
+        self.add_argument("--arch", type=str, default='linear',
+                            help="Architecture of the policy before AC heads, could be attention")
 
         # Validation parameters
         self.add_argument("--val_seed", type=int, default=int(1e9),

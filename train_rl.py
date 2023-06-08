@@ -46,7 +46,7 @@ def main():
     envs = []
     for i in range(args.procs):
         env = StockEnv(stock_trend_filepaths=args.stock_filepaths, 
-                       obs_column_names=args.obs_columns, w=args.w)
+                       obs_column_names=args.obs_columns, w=args.w, c=args.c)
         env.seed(seed = 100 * args.seed + i)
         envs.append(env)
 
@@ -66,7 +66,9 @@ def main():
 
     # Define actor-critic model
     acmodel = None
-    acmodel = ACModel(envs[0].observation_space, envs[0].action_space, memory_dim=args.memory_dim)
+    acmodel = ACModel(envs[0].observation_space, envs[0].action_space, 
+                      memory_dim=args.memory_dim,
+                      arch=args.arch)
     utils.save_model(acmodel, args.model)
 
     if device == 'cuda':

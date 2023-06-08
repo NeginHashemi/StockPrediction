@@ -16,19 +16,34 @@ def initialize_parameters(m):
 
 
 class ACModel(nn.Module):
-    def __init__(self, obs_space, action_space, memory_dim=64):
+    def __init__(self, obs_space, action_space, memory_dim=64, arch='linear', c=50, w=14):
         super().__init__()
         
         self.obs_space = obs_space
         self.action_space = action_space
         self.memory_dim = memory_dim
         self.input_obs_shape = self.obs_space[0].shape[0]
+        self.arch = arch
+        self.window_size = w
+        self.past_window_size = c
+
+        if self.arch == 'linear':
         
-        self.layers = nn.Sequential(
-            nn.Linear(self.input_obs_shape, 64),
-            nn.ReLU(),
-            nn.Linear(64, self.memory_dim)
-        )
+            self.layers = nn.Sequential(
+                nn.Linear(self.input_obs_shape, 64),
+                nn.ReLU(),
+                nn.Linear(64, self.memory_dim)
+            )
+
+        else:
+
+            self.conv = nn.Conv2d(kernel_size=(1, self.input_obs_shape), out_channels=1, in_channels=1)
+            self.transformer = nn.TransformerEncoder(
+                nn.TransformerEncoderLayer(self.past_window_size, 4),
+                2
+            )
+
+            self.fc1 = nn.Linear(self.past_window_size, self.memory_dim)
 
         # Define memory
         self.memory_rnn = nn.LSTMCell(self.memory_dim, self.memory_dim)
@@ -64,8 +79,14 @@ class ACModel(nn.Module):
         return self.memory_dim
 
     def forward(self, obs, memory):
-        
-        x = self.layers(obs) # model output
+
+        if self.arch == 'linear':
+            x = self.layers(obs) # model output
+        elif self.arch == 'attention':
+            print(obs.shape, '===========', 'done')
+            embedded = self.conv(obs)
+            output = self.transformer(embedded.squeeze(3))
+            x = self.fc1(output.squeeze(1))
 
         hidden = (memory[:, :self.semi_memory_size], memory[:, self.semi_memory_size:])
 
