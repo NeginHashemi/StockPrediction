@@ -10,7 +10,7 @@ from ppo import DictList
 class RawImagePreprocessor(object):
     def __call__(self, obss, device=None):
         obs = numpy.array(obss)
-        obs = torch.tensor(obs, device=device, dtype=torch.float)
+        obs = torch.from_numpy(obs, device=device, dtype=torch.float)
         return obs
 
 

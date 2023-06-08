@@ -16,7 +16,7 @@ def initialize_parameters(m):
 
 
 class ACModel(nn.Module):
-    def __init__(self, obs_space, action_space, memory_dim=64, arch='linear', c=50, w=14):
+    def __init__(self, obs_space, action_space, memory_dim=64, arch='linear', c=100, w=14):
         super().__init__()
         
         self.obs_space = obs_space
@@ -83,7 +83,6 @@ class ACModel(nn.Module):
         if self.arch == 'linear':
             x = self.layers(obs) # model output
         elif self.arch == 'attention':
-            print(obs.shape, '===========', 'done')
             embedded = self.conv(obs)
             output = self.transformer(embedded.squeeze(3))
             x = self.fc1(output.squeeze(1))
