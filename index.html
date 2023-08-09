@@ -1,0 +1,108 @@
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<script src="https://kit.fontawesome.com/yourcode.js" crossorigin="anonymous"></script>
+<title>Test</title>
+
+</head>
+
+<body>
+
+    <style>
+
+        .center {
+            position: relative;
+            width: 90%;
+            text-align: center;
+            margin: auto;
+        }
+
+        .button {
+            background-color: #4CAF50; /* Green */
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            font-weight: bold;
+            font-family:'Courier New', Courier, monospace;
+        }
+
+        img { 
+            width: 30%;
+            height: auto;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .custom-file-upload {
+            background-color: #4CAF50; /* Green */
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            font-weight: 900;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        p {
+            font-size: 16px;
+            font-weight: bold;
+            font-family: 'Courier New', Courier, monospace;
+        }
+    </style>
+
+    <script type="text/javascript">
+        function previewFile() {
+            const preview = document.querySelector('img');
+            var file = document.getElementById('fileInput').files[0];
+            const reader = new FileReader();
+            reader.addEventListener("load", function() {
+                preview.src = reader.result; // show image in <img> tag
+            }, false);
+            if (file) {
+                reader.readAsDataURL(file);
+            }
+        }
+    
+        function uploadFile(file) {
+            var file = document.getElementById('fileInput').files[0];
+            if (file) {
+                var formData = new FormData();
+                formData.append('file', file);
+                fetch('http://213.233.184.137:8000/predict/', {
+                        method: 'POST',
+                        body: formData,
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById("serverMsg").innerHTML = "Predicted Label: " + "<span style='color: light-green; font-weight: bolder;'>" + data.label + "</span>"
+                    })
+                    .catch(error => {
+                        console.error(error);
+                });
+            }
+        }
+    </script>
+
+    <div class="center" style="top: 20%;">
+        <label for="fileInput" class="custom-file-upload">
+            <i class="fa fa-cloud-upload"></i> Upload .csv file
+        </label>
+        <input id="fileInput" type="file" /> <!-- onchange="previewFile()"/> -->
+        <input class="button" type="button" value="Predict the trend" onclick="uploadFile()">
+        <button class="button" onClick="window.location.reload();">Try new .csv</button>
+        <p id="serverMsg">Predicted Label: Waiting ...</p>
+        <!-- <img height="200"> -->
+        <p id="box"> </p>
+    </div>
+
+</body>
+</html>

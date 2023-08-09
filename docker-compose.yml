@@ -1,0 +1,7 @@
+version: "2"
+services:
+  api:
+    image: application:lastVersion3
+    ports:
+        - "8000:8000"
+        - "8080:8080"
